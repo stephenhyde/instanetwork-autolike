@@ -5,12 +5,14 @@
  * of hashtags with Instagram
  */
 package com.mycompany.instagramautolike;
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.Keys;
@@ -19,9 +21,9 @@ import org.openqa.selenium.phantomjs.PhantomJSDriver;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.phantomjs.PhantomJSDriverService;
+
 /**
  * Instanetwork Version 19.0
- *
  */
 public class InstaLikeNonGUI {
     PhantomJSDriver driver;  //Ghostdriver
@@ -53,6 +55,7 @@ public class InstaLikeNonGUI {
     private final String followingCountXpath = "//li[2]/a/span[contains(@class,'_bkw5z')]";
     private final int tagLimit = 20;                      //tag limit that can be attached to a photo
     private Actions actions;                              //action library to interact with driver
+
     //Constructor - Saves all variables sent in from Jar
     public InstaLikeNonGUI(String iProt, String iport, String pUser, String pPass, String user, String pass, String email, int insMax, int tagLikeSleep, int betweenSleep, int tagLikeLimit, int tagBetweenSite, List<String> l) {
         ip = iProt;
@@ -76,25 +79,26 @@ public class InstaLikeNonGUI {
         likeAlgo();
         driver.quit();
     }
+
     /*webdriver that uses ghostdriver from phantomjs to scrape pages
      headlessly *Custom Settings*/
     private void loadLightWeightDriverCustom(boolean noPic) {
         //  File PHANTOMJS_EXE = new File("//home/innwadmin/phantomjs/bin/phantomjs");  // Linux File
         // File PHANTOMJS_EXE = new File("C:/Users/stephen/Documents/Instanetwork/Instagram AutoLike/InstagramAutoLike/phantomjs-2.0.0-windows/bin/phantomjs.exe"); // Windows File
-          File PHANTOMJS_EXE = new File("/Users/stephen.hyde/repositories/phantomjs-2.1.1-macosx/bin/phantomjs");  // Linux File
+        File PHANTOMJS_EXE = new File("/Users/stephen.hyde/repositories/phantomjs-2.1.1-macosx/bin/phantomjs");  // Linux File
         ArrayList<String> cliArgsCap = new ArrayList();
         DesiredCapabilities caps = new DesiredCapabilities();
         caps.setCapability("phantomjs.binary.path",
                 PHANTOMJS_EXE.getAbsolutePath());
         caps.setJavascriptEnabled(true);
-        //cliArgsCap.add("--proxy=" + ip + ":" + port); //8080 for tinyproxy
+        cliArgsCap.add("--proxy=" + ip + ":" + port); //8080 for tinyproxy
         if (!proxyUser.equalsIgnoreCase("none")) {
-            cliArgsCap.add("--proxy-auth=" + proxyUser + ":" + proxyPass);
+             cliArgsCap.add("--proxy-auth=" + proxyUser + ":" + proxyPass);
         }
         cliArgsCap.add("--max-disk-cache-size=0");
         cliArgsCap.add("--disk-cache=false");
         cliArgsCap.add("--webdriver-loglevel=NONE");
-        if (noPic == true) {
+        if (noPic) {
             cliArgsCap.add("--load-images=false");
         }
         caps.setCapability(
@@ -103,6 +107,7 @@ public class InstaLikeNonGUI {
         driver.manage().window().maximize();
         actions = new Actions(driver);
     }
+
     /*Main Algorithm to rotate between all access points specified
      on Interface and call their respective like modules*/
     private void likeAlgo() {
@@ -114,12 +119,13 @@ public class InstaLikeNonGUI {
             }
         }
     }
+
     /*Initialize Like Function by initializing phantomjs driver,
      call like method and increment hashtag*/
     private void InitializeLikeFunction(String link, boolean pic) {
         loadLightWeightDriverCustom(pic);
         try {
-            if (login(link, username, password) == true) {
+            if (login(link, username, password)) {
                 for (int i = 0; i < hashtagsBetweenSitesLimit; i++) {
                     checkHourTime();
                     if (instagramCounter >= insMaxLikes) {
@@ -135,6 +141,7 @@ public class InstaLikeNonGUI {
             System.out.println("Remote Browser Unreachable Exception!");
         }
     }
+
     //Hash Counter to keep track of position in list
     private int incrementHashCount(int hashCount) {
         int hCount = hashCount + 1;
@@ -143,6 +150,7 @@ public class InstaLikeNonGUI {
         }
         return hCount;
     }
+
     //Login to an access point (Called from loginAccessPoints)
     private boolean login(String link, String username, String password) throws org.openqa.selenium.remote.UnreachableBrowserException {
         driver.get(link);
@@ -162,6 +170,7 @@ public class InstaLikeNonGUI {
             return false;
         }
     }
+
     private void likeHashtagInstagram(String hashtag) throws org.openqa.selenium.remote.UnreachableBrowserException {
         String url = "https://www.instagram.com/explore/tags/".concat(hashtag);
         int count = 0;
@@ -219,7 +228,7 @@ public class InstaLikeNonGUI {
                     Boolean liked = retryingFindClick(likeButton, like.get(0));
 
                     //Verify photo was liked
-                    if(!liked){
+                    if (!liked) {
                         closePictureWindow();
                         continue;
                     }
@@ -245,7 +254,7 @@ public class InstaLikeNonGUI {
                     break;
                 } else {
                     loopCount += 1;
-                    if (firstScroll == true) {
+                    if (firstScroll) {
                         actions.sendKeys(Keys.chord(Keys.CONTROL, Keys.END)).perform();
                         continue;
                     }
@@ -265,6 +274,7 @@ public class InstaLikeNonGUI {
             System.out.println("Exception thrown in Instagram" + e);
         }
     }
+
     //Creates a new page that goes to the profile of a given user and checks there follower count
     private int checkFollowerCount(String u) throws org.openqa.selenium.remote.UnreachableBrowserException {
         int result = 0;
@@ -291,6 +301,7 @@ public class InstaLikeNonGUI {
         }
         return result;
     }
+
     private void closePictureWindow() throws org.openqa.selenium.remote.UnreachableBrowserException {
         List<WebElement> exit = driver.findElements(By.xpath("//button[@class='_3eajp']"));
         if (!exit.isEmpty()) {
@@ -298,7 +309,7 @@ public class InstaLikeNonGUI {
         }
     }
 
-    public boolean retryingFindClick(By by, WebElement button) throws org.openqa.selenium.remote.UnreachableBrowserException {
+    private boolean retryingFindClick(By by, WebElement button) throws org.openqa.selenium.remote.UnreachableBrowserException {
         boolean result = false;
         int attempts = 0;
         while (attempts < 3) {
@@ -306,7 +317,7 @@ public class InstaLikeNonGUI {
                 button.click();
                 result = true;
                 break;
-            } catch (org.openqa.selenium.WebDriverException e ) {
+            } catch (org.openqa.selenium.WebDriverException e) {
                 button = driver.findElement(by);
                 System.out.println("Stale Element!!! ");
             }
@@ -322,6 +333,7 @@ public class InstaLikeNonGUI {
         count = count + 1;
         return count;
     }
+
     /*Change time if been over an hour from previous time saved for Instagram Total / Access Points
      reset all counters (Total & access points)*/
     private void checkHourTime() {
@@ -329,7 +341,7 @@ public class InstaLikeNonGUI {
         long timeLike = System.currentTimeMillis();
         if (timeLike - timeOffsetInstagramTotal > hourTime) {
             System.out.println("Like period Ended:" + date.toString() + " Total Likes " + instagramCounter);
-            if (instagramCounter < photoPerHourResetThres && possiblePasswordReset == false && timeOffsetInstagramTotal != 0) {
+            if (instagramCounter < photoPerHourResetThres && !possiblePasswordReset && timeOffsetInstagramTotal != 0) {
                 flagAccountForReset();
             }
             instagramCounter = 0;
@@ -340,12 +352,14 @@ public class InstaLikeNonGUI {
             checkHourTime();
         }
     }
+
     //Increase Access Point and call initialize clock on program inception
     private void IncrementCounters() {
         InitializeClock();
         instaTotalLikes += 1;
         instagramCounter += 1;
     }
+
     //sleep between likes or hashtags
     private void sleepBetweenLikesHashtags(int high, int sleep) {
         Random rand = new Random();
@@ -356,6 +370,7 @@ public class InstaLikeNonGUI {
             System.out.println("Interrupted Exception on sleepBetweenLikesHashtags");
         }
     }
+
     //Sleep prior to webstagram login
     private void sleepExtraPageLoad() {
         try {
@@ -364,6 +379,7 @@ public class InstaLikeNonGUI {
             System.out.println("Interrupted Exception on sleepDuringWebstaLogin");
         }
     }
+
     //when instagram exceeded its like/hour threshold or all access points reach like/hour threshold, sleep program
     private void SleepProgram(long curTime) {
         Date date = new Date();
@@ -375,6 +391,7 @@ public class InstaLikeNonGUI {
             }
         }
     }
+
     //Limited activity check which writes to a file with username as file name and email in contents
     private void flagAccountForReset() {
         try {
@@ -391,6 +408,7 @@ public class InstaLikeNonGUI {
             System.out.println("Flag for reset failed " + e);
         }
     }
+
     //Upon liking first photo, initialize the time stamp for the associated excess point
     private void InitializeClock() {
         Date date = new Date();
@@ -400,15 +418,18 @@ public class InstaLikeNonGUI {
             System.out.println("Instagram Time Inititalized " + date.toString());
         }
     }
+
     //reset driver
     private void resetDriver() {
         driver.quit();
         loadLightWeightDriverCustom(false);
     }
+
     //is string an integer by regex
     private boolean IsInt_ByRegex(String str) {
         return str.matches("^-?\\d+$");
     }
+
     //checks if user had a photo liked
     private boolean userExist(String v) {
         if (!likeUsers.isEmpty()) {
