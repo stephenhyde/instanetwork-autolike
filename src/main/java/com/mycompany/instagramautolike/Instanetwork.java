@@ -6,17 +6,15 @@
 package com.mycompany.instagramautolike;
 import java.util.*;
 public class Instanetwork {
-    private InstaLikeNonGUI instaLike;
     private static final int NUM_ARGS = 13;
-    List<String> hashtags = new ArrayList();
-    public Instanetwork() {
+    private Instanetwork() {
         InitiateTest();
     }
-    public Instanetwork(String[] a, List<String> l) {
+    private Instanetwork(String[] a, List<String> l) {
         InitiateInstanetwork(a, l);
     }
     private void InitiateTest() {
-        List<String> htags = new ArrayList();
+        List<String> htags = new ArrayList<>();
         htags.add("appreciation");
         htags.add("bodybuilding");
         htags.add("books");
@@ -45,15 +43,15 @@ public class Instanetwork {
         htags.add("shreded");
         htags.add("truth");
         htags.add("vip");
-        instaLike = new InstaLikeNonGUI("167.114.103.96","8080","none", "none", "hydnova", "T3lephone","stevehyde797@gmail.com", 50, 15, 15, 5, 5, htags);
+        new InstaLikeNonGUI("167.114.103.96","8080","none", "none", "hydnova", "T3lephone","stevehyde797@gmail.com", 50, 15, 15, 5, 5, htags);
     }
 
     private void InitiateInstanetwork(String[] a, List<String> l) {
-        instaLike = new InstaLikeNonGUI(a[0], a[1], a[2], a[3], a[4], a[5], a[6], Integer.valueOf(a[7]), Integer.valueOf(a[8]), Integer.valueOf(a[9]), Integer.valueOf(a[10]), Integer.valueOf(a[11]), l);
+        new InstaLikeNonGUI(a[0], a[1], a[2], a[3], a[4], a[5], a[6], Integer.valueOf(a[7]), Integer.valueOf(a[8]), Integer.valueOf(a[9]), Integer.valueOf(a[10]), Integer.valueOf(a[11]), l);
     }
 
     public static void main(String[] args) {
-        List<String> htags = new ArrayList();
+        List<String> htags = new ArrayList<>();
         if (args.length == 0) {
             new Instanetwork();
         } else if (args.length > NUM_ARGS) {

@@ -51,7 +51,8 @@ public class InstaLikeNonGUI {
     private long timeOffsetInstagramTotal = 0;            //time in miliseconds used to keep track of likes/hour for All access points
     private boolean possiblePasswordReset = false;        //Possible Reset - Flag for further investigation
     private final int photoPerHourResetThres = 0;         //If photos liked per hour are less than thresh, flag account
-    private final int spamFilterFollowerCount = 50;      //Count of followers per user for spam detection
+    private final int spamFilterFollowerCount = 50;       //Count of followers per user for spam detection
+    private final int spamFilterFollowingCount = 100;      //Count of following per user for spam detection
     private final String followingCountXpath = "//li[2]/a/span[contains(@class,'_bkw5z')]";
     private final int tagLimit = 20;                      //tag limit that can be attached to a photo
     private Actions actions;                              //action library to interact with driver
@@ -86,7 +87,7 @@ public class InstaLikeNonGUI {
         //  File PHANTOMJS_EXE = new File("//home/innwadmin/phantomjs/bin/phantomjs");  // Linux File
         // File PHANTOMJS_EXE = new File("C:/Users/stephen/Documents/Instanetwork/Instagram AutoLike/InstagramAutoLike/phantomjs-2.0.0-windows/bin/phantomjs.exe"); // Windows File
         File PHANTOMJS_EXE = new File("/Users/stephen.hyde/repositories/phantomjs-2.1.1-macosx/bin/phantomjs");  // Linux File
-        ArrayList<String> cliArgsCap = new ArrayList();
+        ArrayList<String> cliArgsCap = new ArrayList<>();
         DesiredCapabilities caps = new DesiredCapabilities();
         caps.setCapability("phantomjs.binary.path",
                 PHANTOMJS_EXE.getAbsolutePath());
@@ -388,6 +389,7 @@ public class InstaLikeNonGUI {
                 System.out.println("Instagram Threshold Met, Sleeping; Time Remaining: " + (hourTime - (curTime - timeOffsetInstagramTotal)) + " " + date);
                 Thread.sleep(hourTime - (curTime - timeOffsetInstagramTotal));
             } catch (InterruptedException e) {
+                System.out.println("Error while sleeping");
             }
         }
     }
@@ -431,10 +433,10 @@ public class InstaLikeNonGUI {
     }
 
     //checks if user had a photo liked
-    private boolean userExist(String v) {
+    private boolean userExist(String u) {
         if (!likeUsers.isEmpty()) {
-            for (int i = 0; i < likeUsers.size(); i++) {
-                if (likeUsers.get(i).equalsIgnoreCase(v)) {
+            for (String user  : likeUsers) {
+                if (user.equalsIgnoreCase(u)) {
                     return true;
                 }
             }
