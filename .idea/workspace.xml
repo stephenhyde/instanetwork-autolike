@@ -35,13 +35,13 @@
       <file leaf-file-name="InstaLikeNonGUI.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/main/java/com/mycompany/instagramautolike/InstaLikeNonGUI.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="647">
-              <caret line="444" column="5" lean-forward="true" selection-start-line="444" selection-start-column="5" selection-end-line="444" selection-end-column="5" />
+            <state relative-caret-position="332">
+              <caret line="222" column="0" lean-forward="false" selection-start-line="222" selection-start-column="0" selection-end-line="222" selection-end-column="0" />
               <folding>
-                <element signature="e#0#19787#0" expanded="true" />
+                <element signature="e#0#20620#0" expanded="true" />
                 <element signature="imports" expanded="true" />
-                <element signature="e#19424#19425#0" expanded="true" />
-                <element signature="e#19470#19471#0" expanded="true" />
+                <element signature="e#20257#20258#0" expanded="true" />
+                <element signature="e#20303#20304#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -75,6 +75,7 @@
   <component name="FindInProjectRecents">
     <findStrings>
       <find>We are now validating inputs</find>
+      <find>following</find>
     </findStrings>
   </component>
   <component name="GradleLocalSettings">
@@ -595,12 +596,12 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1482171851483</updated>
-      <workItem from="1482171852769" duration="3398000" />
+      <workItem from="1482171852769" duration="8536000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="3398000" />
+    <option name="totallyTimeSpent" value="8536000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="23" width="1440" height="873" extended-state="6" />
@@ -660,6 +661,14 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/pom.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="135">
+          <caret line="9" column="10" lean-forward="false" selection-start-line="9" selection-start-column="10" selection-end-line="9" selection-end-column="10" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/com/mycompany/instagramautolike/Instanetwork.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="272">
@@ -674,23 +683,15 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/pom.xml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="135">
-          <caret line="9" column="10" lean-forward="false" selection-start-line="9" selection-start-column="10" selection-end-line="9" selection-end-column="10" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/com/mycompany/instagramautolike/InstaLikeNonGUI.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="647">
-          <caret line="444" column="5" lean-forward="true" selection-start-line="444" selection-start-column="5" selection-end-line="444" selection-end-column="5" />
+        <state relative-caret-position="332">
+          <caret line="222" column="0" lean-forward="false" selection-start-line="222" selection-start-column="0" selection-end-line="222" selection-end-column="0" />
           <folding>
-            <element signature="e#0#19787#0" expanded="true" />
+            <element signature="e#0#20620#0" expanded="true" />
             <element signature="imports" expanded="true" />
-            <element signature="e#19424#19425#0" expanded="true" />
-            <element signature="e#19470#19471#0" expanded="true" />
+            <element signature="e#20257#20258#0" expanded="true" />
+            <element signature="e#20303#20304#0" expanded="true" />
           </folding>
         </state>
       </provider>

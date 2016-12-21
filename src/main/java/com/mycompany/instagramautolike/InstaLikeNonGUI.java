@@ -53,7 +53,8 @@ public class InstaLikeNonGUI {
     private final int photoPerHourResetThres = 0;         //If photos liked per hour are less than thresh, flag account
     private final int spamFilterFollowerCount = 50;       //Count of followers per user for spam detection
     private final int spamFilterFollowingCount = 100;      //Count of following per user for spam detection
-    private final String followingCountXpath = "//li[2]/a/span[contains(@class,'_bkw5z')]";
+    private final String followerCountXpath = "//li[2]/a/span[contains(@class,'_bkw5z')]";
+    private final String followingCountXpath = "//li[3]/a/span[contains(@class,'_bkw5z')]";
     private final int tagLimit = 20;                      //tag limit that can be attached to a photo
     private Actions actions;                              //action library to interact with driver
 
@@ -84,17 +85,17 @@ public class InstaLikeNonGUI {
     /*webdriver that uses ghostdriver from phantomjs to scrape pages
      headlessly *Custom Settings*/
     private void loadLightWeightDriverCustom(boolean noPic) {
-        //  File PHANTOMJS_EXE = new File("//home/innwadmin/phantomjs/bin/phantomjs");  // Linux File
+        // File PHANTOMJS_EXE = new File("//home/innwadmin/phantomjs/bin/phantomjs");  // Linux File
         // File PHANTOMJS_EXE = new File("C:/Users/stephen/Documents/Instanetwork/Instagram AutoLike/InstagramAutoLike/phantomjs-2.0.0-windows/bin/phantomjs.exe"); // Windows File
-        File PHANTOMJS_EXE = new File("/Users/stephen.hyde/repositories/phantomjs-2.1.1-macosx/bin/phantomjs");  // Linux File
+         File PHANTOMJS_EXE = new File("/Users/stephen.hyde/repositories/phantomjs-2.1.1-macosx/bin/phantomjs");  // Linux File
         ArrayList<String> cliArgsCap = new ArrayList<>();
         DesiredCapabilities caps = new DesiredCapabilities();
         caps.setCapability("phantomjs.binary.path",
                 PHANTOMJS_EXE.getAbsolutePath());
         caps.setJavascriptEnabled(true);
-        cliArgsCap.add("--proxy=" + ip + ":" + port); //8080 for tinyproxy
+        // cliArgsCap.add("--proxy=" + ip + ":" + port); //8080 for tinyproxy
         if (!proxyUser.equalsIgnoreCase("none")) {
-             cliArgsCap.add("--proxy-auth=" + proxyUser + ":" + proxyPass);
+         //    cliArgsCap.add("--proxy-auth=" + proxyUser + ":" + proxyPass);
         }
         cliArgsCap.add("--max-disk-cache-size=0");
         cliArgsCap.add("--disk-cache=false");
@@ -220,7 +221,7 @@ public class InstaLikeNonGUI {
                     likeUsers.add(name);
 
                     //Verify follower count is within threshold
-                    if (checkFollowerCount(name) <= spamFilterFollowerCount) {
+                    if (isProfileSpam(name)) {
                         closePictureWindow();
                         continue;
                     }
@@ -277,9 +278,10 @@ public class InstaLikeNonGUI {
     }
 
     //Creates a new page that goes to the profile of a given user and checks there follower count
-    private int checkFollowerCount(String u) throws org.openqa.selenium.remote.UnreachableBrowserException {
-        int result = 0;
-        String folCount;
+    private boolean isProfileSpam(String u) throws org.openqa.selenium.remote.UnreachableBrowserException {
+        boolean followingCountSpam = false;
+        boolean followerCountSpam = false;
+
         if (!u.isEmpty()) {
             String mainWindow = driver.getWindowHandle();
             driver.manage().timeouts().implicitlyWait(25, TimeUnit.SECONDS);
@@ -289,18 +291,13 @@ public class InstaLikeNonGUI {
             if (driver.getWindowHandles().size() > 1) {
                 String profileWindow = (String) driver.getWindowHandles().toArray()[1];
                 driver.switchTo().window(profileWindow);
-                List<WebElement> followerCount = driver.findElements(By.xpath(followingCountXpath));
-                if (!followerCount.isEmpty()) {
-                    folCount = followerCount.get(0).getAttribute("title").replace(",", "");
-                    if (IsInt_ByRegex(folCount)) {
-                        result = Integer.parseInt(folCount);
-                    }
-                }
+                followerCountSpam = isFollowerCountSpam();
+                followingCountSpam = isFollowingCountSpam();
                 driver.close();
                 driver.switchTo().window(mainWindow);
             }
         }
-        return result;
+        return (followingCountSpam || followerCountSpam);
     }
 
     private void closePictureWindow() throws org.openqa.selenium.remote.UnreachableBrowserException {
@@ -308,6 +305,34 @@ public class InstaLikeNonGUI {
         if (!exit.isEmpty()) {
             exit.get(0).click();
         }
+    }
+
+    private boolean isFollowerCountSpam() {
+        String pathCount;
+        List<WebElement> count = driver.findElements(By.xpath(followerCountXpath));
+        if (!count.isEmpty()) {
+            pathCount = count.get(0).getAttribute("title").replace(",", "");
+            if (IsInt_ByRegex(pathCount)) {
+                if (Integer.parseInt(pathCount) <= spamFilterFollowerCount) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private boolean isFollowingCountSpam() {
+        String pathCount;
+        List<WebElement> count = driver.findElements(By.xpath(followingCountXpath));
+        if (!count.isEmpty()) {
+            pathCount = count.get(0).getText().replace(",", "");
+            if (IsInt_ByRegex(pathCount)) {
+                if (Integer.parseInt(pathCount) <= spamFilterFollowingCount) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     private boolean retryingFindClick(By by, WebElement button) throws org.openqa.selenium.remote.UnreachableBrowserException {
