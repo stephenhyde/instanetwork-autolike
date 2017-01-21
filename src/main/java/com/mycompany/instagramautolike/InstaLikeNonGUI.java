@@ -85,17 +85,17 @@ public class InstaLikeNonGUI {
     /*webdriver that uses ghostdriver from phantomjs to scrape pages
      headlessly *Custom Settings*/
     private void loadLightWeightDriverCustom(boolean noPic) {
-        // File PHANTOMJS_EXE = new File("//home/innwadmin/phantomjs/bin/phantomjs");  // Linux File
+        File PHANTOMJS_EXE = new File("//home/innwadmin/phantomjs/bin/phantomjs");  // Linux File
         // File PHANTOMJS_EXE = new File("C:/Users/stephen/Documents/Instanetwork/Instagram AutoLike/InstagramAutoLike/phantomjs-2.0.0-windows/bin/phantomjs.exe"); // Windows File
-         File PHANTOMJS_EXE = new File("/Users/stephen.hyde/repositories/phantomjs-2.1.1-macosx/bin/phantomjs");  // Linux File
+        // File PHANTOMJS_EXE = new File("/Users/stephen.hyde/repositories/phantomjs-2.1.1-macosx/bin/phantomjs");  // Linux File
         ArrayList<String> cliArgsCap = new ArrayList<>();
         DesiredCapabilities caps = new DesiredCapabilities();
         caps.setCapability("phantomjs.binary.path",
                 PHANTOMJS_EXE.getAbsolutePath());
         caps.setJavascriptEnabled(true);
-        // cliArgsCap.add("--proxy=" + ip + ":" + port); //8080 for tinyproxy
+        cliArgsCap.add("--proxy=" + ip + ":" + port); //8080 for tinyproxy
         if (!proxyUser.equalsIgnoreCase("none")) {
-         //    cliArgsCap.add("--proxy-auth=" + proxyUser + ":" + proxyPass);
+             cliArgsCap.add("--proxy-auth=" + proxyUser + ":" + proxyPass);
         }
         cliArgsCap.add("--max-disk-cache-size=0");
         cliArgsCap.add("--disk-cache=false");
@@ -159,7 +159,7 @@ public class InstaLikeNonGUI {
         driver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
         List<WebElement> user = driver.findElements(By.xpath("//input[@name='username']"));
         List<WebElement> pass = driver.findElements(By.xpath("//input[@name='password']"));
-        List<WebElement> login = driver.findElements(By.xpath("//button[@class='_aj7mu _taytv _ki5uo _o0442']"));
+        List<WebElement> login = driver.findElements(By.xpath("//button[@class='_ah57t _84y62 _7xso1 _rmr7s']"));
         driver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
         if (user.size() > 0 && pass.size() > 0 && login.size() > 0) {
             user.get(0).sendKeys(username);
@@ -169,6 +169,7 @@ public class InstaLikeNonGUI {
             sleepExtraPageLoad();
             return true;
         } else {
+            System.out.println("Unable to login!");
             return false;
         }
     }
@@ -191,6 +192,7 @@ public class InstaLikeNonGUI {
                     // Verify tag size is within threshold
                     List<WebElement> tags = driver.findElements(By.xpath("//article/div/ul[1]/li[1]/h1[1]/span[1]/a"));
                     if (tags.size() >= tagLimit) {
+                        System.out.println("Tag Limit Too High " + tags.size());
                         closePictureWindow();
                         continue;
                     }
@@ -199,6 +201,7 @@ public class InstaLikeNonGUI {
                     By likeButton = By.xpath("//a/span[@class='_soakw coreSpriteHeartOpen']");
                     List<WebElement> like = driver.findElements(likeButton);
                     if (like.isEmpty()) {
+                        System.out.println("Picture was liked");
                         closePictureWindow();
                         continue;
                     }
@@ -206,6 +209,7 @@ public class InstaLikeNonGUI {
                     //verify username present
                     List<WebElement> picUsername = driver.findElements(By.xpath("//article/header/div[@class='_f95g7']/a[1]"));
                     if (picUsername.isEmpty()) {
+                        System.out.println("Unable to read username");
                         closePictureWindow();
                         continue;
                     }
@@ -213,6 +217,7 @@ public class InstaLikeNonGUI {
                     //verify user has not been liked already
                     String name = picUsername.get(0).getText();
                     if (userExist(name)) {
+                        System.out.println("Already like a photo from user");
                         closePictureWindow();
                         continue;
                     }
@@ -222,6 +227,7 @@ public class InstaLikeNonGUI {
 
                     //Verify follower count is within threshold
                     if (isProfileSpam(name)) {
+                        System.out.println("Profile seems like spam " + name);
                         closePictureWindow();
                         continue;
                     }
@@ -231,6 +237,7 @@ public class InstaLikeNonGUI {
 
                     //Verify photo was liked
                     if (!liked) {
+                        System.out.println("Error while liking photo " + name);
                         closePictureWindow();
                         continue;
                     }
