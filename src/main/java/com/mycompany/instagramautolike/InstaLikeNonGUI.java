@@ -159,7 +159,7 @@ public class InstaLikeNonGUI {
         driver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
         List<WebElement> user = driver.findElements(By.xpath("//input[@name='username']"));
         List<WebElement> pass = driver.findElements(By.xpath("//input[@name='password']"));
-        List<WebElement> login = driver.findElements(By.xpath("//button[@class='_ah57t _84y62 _7xso1 _rmr7s']"));
+        List<WebElement> login = driver.findElements(By.xpath("//span[1]/button[contains(@class, '_ah57t')]"));
         driver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
         if (user.size() > 0 && pass.size() > 0 && login.size() > 0) {
             user.get(0).sendKeys(username);
