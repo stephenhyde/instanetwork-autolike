@@ -51,8 +51,8 @@ public class InstaLikeNonGUI {
     private long timeOffsetInstagramTotal = 0;            //time in miliseconds used to keep track of likes/hour for All access points
     private boolean possiblePasswordReset = false;        //Possible Reset - Flag for further investigation
     private final int photoPerHourResetThres = 0;         //If photos liked per hour are less than thresh, flag account
-    private final int spamFilterFollowerCount = 50;       //Count of followers per user for spam detection
-    private final int spamFilterFollowingCount = 100;      //Count of following per user for spam detection
+    private final int spamFilterFollowerCount = 125;      //Count of followers per user for spam detection
+    private final int spamFilterFollowingCount = 100;     //Count of following per user for spam detection
     private final String followerCountXpath = "//li[2]/a/span[contains(@class,'_bkw5z')]";
     private final String followingCountXpath = "//li[3]/a/span[contains(@class,'_bkw5z')]";
     private final int tagLimit = 20;                      //tag limit that can be attached to a photo
@@ -189,19 +189,19 @@ public class InstaLikeNonGUI {
                     //Expand picture
                     i.click();
 
-                    // Verify tag size is within threshold
-                    List<WebElement> tags = driver.findElements(By.xpath("//article/div/ul[1]/li[1]/h1[1]/span[1]/a"));
-                    if (tags.size() >= tagLimit) {
-                        System.out.println("Tag Limit Too High " + tags.size());
-                        closePictureWindow();
-                        continue;
-                    }
-
                     //verify picture not liked
                     By likeButton = By.xpath("//a/span[@class='_soakw coreSpriteHeartOpen']");
                     List<WebElement> like = driver.findElements(likeButton);
                     if (like.isEmpty()) {
                         System.out.println("Picture was liked");
+                        closePictureWindow();
+                        continue;
+                    }
+
+                    // Verify tag size is within threshold
+                    List<WebElement> tags = driver.findElements(By.xpath("//article/div/ul[1]/li[1]/h1[1]/span[1]/a"));
+                    if (tags.size() >= tagLimit) {
+                        System.out.println("Tag Limit Too High " + tags.size());
                         closePictureWindow();
                         continue;
                     }
