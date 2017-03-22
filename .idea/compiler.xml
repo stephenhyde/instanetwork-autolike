@@ -9,8 +9,8 @@
         <module name="InstagramAutoLike" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel target="1.7">
-      <module name="InstagramAutoLike" target="1.7" />
+    <bytecodeTargetLevel target="1.8">
+      <module name="InstagramAutoLike" target="1.8" />
     </bytecodeTargetLevel>
   </component>
 </project>

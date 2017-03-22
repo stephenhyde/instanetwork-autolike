@@ -6,7 +6,7 @@
 package com.mycompany.instagramautolike;
 import java.util.*;
 public class Instanetwork {
-    private static final int NUM_ARGS = 13;
+    private static final int NUM_ARGS = 12;
     private Instanetwork() {
         InitiateTest();
     }
