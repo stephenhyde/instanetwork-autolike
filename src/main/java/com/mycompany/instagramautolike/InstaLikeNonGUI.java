@@ -57,6 +57,7 @@ public class InstaLikeNonGUI {
     private final String followingCountXpath = "//li[3]/a/span[contains(@class,'_bkw5z')]";
     private final int tagLimit = 20;                      //tag limit that can be attached to a photo
     private Actions actions;                              //action library to interact with driver
+    private List<WebElement> pictures;
 
     //Constructor - Saves all variables sent in from Jar
     public InstaLikeNonGUI(String iProt, String iport, String pUser, String pPass, String user, String pass, String email, int insMax, int tagLikeSleep, int betweenSleep, int tagLikeLimit, int tagBetweenSite, List<String> l) {
@@ -87,7 +88,7 @@ public class InstaLikeNonGUI {
     private void loadLightWeightDriverCustom(boolean noPic) {
         File PHANTOMJS_EXE = new File("//home/innwadmin/phantomjs/bin/phantomjs");  // Linux File
         // File PHANTOMJS_EXE = new File("C:/Users/stephen/Documents/Instanetwork/Instagram AutoLike/InstagramAutoLike/phantomjs-2.0.0-windows/bin/phantomjs.exe"); // Windows File
-        // File PHANTOMJS_EXE = new File("/Users/stephen.hyde/repositories/phantomjs-2.1.1-macosx/bin/phantomjs");  // Linux File
+         // File PHANTOMJS_EXE = new File("/Users/stephen.hyde/repositories/phantomjs-2.1.1-macosx/bin/phantomjs");  // Linux File
         ArrayList<String> cliArgsCap = new ArrayList<>();
         DesiredCapabilities caps = new DesiredCapabilities();
         caps.setCapability("phantomjs.binary.path",
@@ -167,11 +168,19 @@ public class InstaLikeNonGUI {
             sleepExtraPageLoad();
             login.get(0).click();
             sleepExtraPageLoad();
-            return true;
         } else {
             System.out.println("Unable to login!");
             return false;
         }
+
+        driver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
+        List<WebElement> name = driver.findElements(By.xpath("//a[contains(@class, '_soakw')]"));
+        Boolean result = name.size() > 0;
+
+        System.out.println("User Login was " + result);
+
+        return result;
+
     }
 
     private void likeHashtagInstagram(String hashtag) throws org.openqa.selenium.remote.UnreachableBrowserException {
@@ -179,22 +188,24 @@ public class InstaLikeNonGUI {
         int count = 0;
         int loopCount = 0;
         boolean firstScroll = false;
+        boolean test = true;
         try {
             driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
             driver.get(url);
             while (count < hashtagLikeLimit && instagramCounter < insMaxLikes) {
                 driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
-                List<WebElement> pictures = driver.findElements(By.xpath("//article/div/div/div[position()>=" + loopCount * 5 + "]/a[@class='_8mlbc _vbtk2 _t5r8b']"));
-                for (WebElement i : pictures) {
+                pictures = driver.findElements(By.xpath("//article/div/div/div[position()>=" + loopCount * 5 + "]/a[@class='_8mlbc _vbtk2 _t5r8b']"));
+                for (int i = 0; i < pictures.size(); i++) {
                     //Expand picture
-                    i.click();
+
+                    pictures.get(i).click();
 
                     //verify picture not liked
                     By likeButton = By.xpath("//a/span[@class='_soakw coreSpriteHeartOpen']");
                     List<WebElement> like = driver.findElements(likeButton);
                     if (like.isEmpty()) {
                         System.out.println("Picture was liked");
-                        closePictureWindow();
+                        closePictureWindow(loopCount);
                         continue;
                     }
 
@@ -202,7 +213,7 @@ public class InstaLikeNonGUI {
                     List<WebElement> tags = driver.findElements(By.xpath("//article/div/ul[1]/li[1]/h1[1]/span[1]/a"));
                     if (tags.size() >= tagLimit) {
                         System.out.println("Tag Limit Too High " + tags.size());
-                        closePictureWindow();
+                        closePictureWindow(loopCount);
                         continue;
                     }
 
@@ -210,7 +221,7 @@ public class InstaLikeNonGUI {
                     List<WebElement> picUsername = driver.findElements(By.xpath("//article/header/div[@class='_f95g7']/a[1]"));
                     if (picUsername.isEmpty()) {
                         System.out.println("Unable to read username");
-                        closePictureWindow();
+                        closePictureWindow(loopCount);
                         continue;
                     }
 
@@ -218,7 +229,7 @@ public class InstaLikeNonGUI {
                     String name = picUsername.get(0).getText();
                     if (userExist(name)) {
                         System.out.println("Already like a photo from user");
-                        closePictureWindow();
+                        closePictureWindow(loopCount);
                         continue;
                     }
 
@@ -228,7 +239,7 @@ public class InstaLikeNonGUI {
                     //Verify follower count is within threshold
                     if (isProfileSpam(name)) {
                         System.out.println("Profile seems like spam " + name);
-                        closePictureWindow();
+                        closePictureWindow(loopCount);
                         continue;
                     }
 
@@ -238,13 +249,13 @@ public class InstaLikeNonGUI {
                     //Verify photo was liked
                     if (!liked) {
                         System.out.println("Error while liking photo " + name);
-                        closePictureWindow();
+                        closePictureWindow(loopCount);
                         continue;
                     }
+
                     count = afterLikeIncrement(count);
                     loopCount = 0;
-                    closePictureWindow();
-
+                    closePictureWindow(loopCount);
                     //Break from loop if photo threshold met
                     if (count >= (hashtagLikeLimit) || instagramCounter >= insMaxLikes) {
                         break;
@@ -307,11 +318,14 @@ public class InstaLikeNonGUI {
         return (followingCountSpam || followerCountSpam);
     }
 
-    private void closePictureWindow() throws org.openqa.selenium.remote.UnreachableBrowserException {
+    private void closePictureWindow(int loopCount) throws org.openqa.selenium.remote.UnreachableBrowserException {
+
         List<WebElement> exit = driver.findElements(By.xpath("//button[@class='_3eajp']"));
         if (!exit.isEmpty()) {
             exit.get(0).click();
         }
+
+        pictures = driver.findElements(By.xpath("//article/div/div/div[position()>=" + loopCount * 5 + "]/a[@class='_8mlbc _vbtk2 _t5r8b']"));
     }
 
     private boolean isFollowerCountSpam() {
