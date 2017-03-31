@@ -58,6 +58,7 @@ public class InstaLikeNonGUI {
     private final int tagLimit = 20;                      //tag limit that can be attached to a photo
     private Actions actions;                              //action library to interact with driver
     private List<WebElement> pictures;
+    private int loginAttempts = 0;
 
     //Constructor - Saves all variables sent in from Jar
     public InstaLikeNonGUI(String iProt, String iport, String pUser, String pPass, String user, String pass, String email, int insMax, int tagLikeSleep, int betweenSleep, int tagLikeLimit, int tagBetweenSite, List<String> l) {
@@ -137,6 +138,12 @@ public class InstaLikeNonGUI {
                     likeHashtagInstagram(list.get(hashtagCount));
                     hashtagCount = incrementHashCount(hashtagCount);
                     sleepBetweenLikesHashtags(highBetweenHashtagsSleepThreshold, betweenHashtagSleep);
+                }
+            } else {
+                loginAttempts += 1;
+                sleepBetweenLikesHashtags(60, 20);
+                if (loginAttempts == 10 && !possiblePasswordReset) {
+                    flagAccountForReset("login");
                 }
             }
             driver.quit();
@@ -388,8 +395,8 @@ public class InstaLikeNonGUI {
         long timeLike = System.currentTimeMillis();
         if (timeLike - timeOffsetInstagramTotal > hourTime) {
             System.out.println("Like period Ended:" + date.toString() + " Total Likes " + instagramCounter);
-            if (instagramCounter < photoPerHourResetThres && !possiblePasswordReset && timeOffsetInstagramTotal != 0) {
-                flagAccountForReset();
+            if (instagramCounter <= photoPerHourResetThres && !possiblePasswordReset && timeOffsetInstagramTotal != 0) {
+                flagAccountForReset("likes");
             }
             instagramCounter = 0;
             timeOffsetInstagramTotal = timeLike;
@@ -441,14 +448,14 @@ public class InstaLikeNonGUI {
     }
 
     //Limited activity check which writes to a file with username as file name and email in contents
-    private void flagAccountForReset() {
+    private void flagAccountForReset(String reason) {
         try {
             File file = new File("/home/innwadmin/instanetwork/reset/" + username + ".txt");
             if (!file.exists()) {
                 file.createNewFile();
                 FileWriter fw = new FileWriter(file.getAbsoluteFile());
                 BufferedWriter bw = new BufferedWriter(fw);
-                bw.write(userEmail);
+                bw.write(userEmail + " " + reason);
                 bw.close();
             }
             possiblePasswordReset = true;
