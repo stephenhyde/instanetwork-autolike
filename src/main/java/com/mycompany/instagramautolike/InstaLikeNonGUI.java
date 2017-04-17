@@ -57,7 +57,6 @@ public class InstaLikeNonGUI {
     private final String followingCountXpath = "//li[3]/a/span[contains(@class,'_bkw5z')]";
     private final int tagLimit = 20;                      //tag limit that can be attached to a photo
     private Actions actions;                              //action library to interact with driver
-    private List<WebElement> pictures;
     private int loginAttempts = 0;
 
     //Constructor - Saves all variables sent in from Jar
@@ -87,17 +86,17 @@ public class InstaLikeNonGUI {
     /*webdriver that uses ghostdriver from phantomjs to scrape pages
      headlessly *Custom Settings*/
     private void loadLightWeightDriverCustom(boolean noPic) {
-        File PHANTOMJS_EXE = new File("//home/innwadmin/phantomjs/bin/phantomjs");  // Linux File
+         File PHANTOMJS_EXE = new File("//home/innwadmin/phantomjs/bin/phantomjs");  // Linux File
         // File PHANTOMJS_EXE = new File("C:/Users/stephen/Documents/Instanetwork/Instagram AutoLike/InstagramAutoLike/phantomjs-2.0.0-windows/bin/phantomjs.exe"); // Windows File
-         // File PHANTOMJS_EXE = new File("/Users/stephen.hyde/repositories/phantomjs-2.1.1-macosx/bin/phantomjs");  // Linux File
+        // File PHANTOMJS_EXE = new File("/Users/stephen.hyde/repositories/phantomjs-2.1.1-macosx/bin/phantomjs");  // Linux File
         ArrayList<String> cliArgsCap = new ArrayList<>();
         DesiredCapabilities caps = new DesiredCapabilities();
         caps.setCapability("phantomjs.binary.path",
                 PHANTOMJS_EXE.getAbsolutePath());
         caps.setJavascriptEnabled(true);
-        cliArgsCap.add("--proxy=" + ip + ":" + port); //8080 for tinyproxy
+            cliArgsCap.add("--proxy=" + ip + ":" + port); //8080 for tinyproxy
         if (!proxyUser.equalsIgnoreCase("none")) {
-             cliArgsCap.add("--proxy-auth=" + proxyUser + ":" + proxyPass);
+            cliArgsCap.add("--proxy-auth=" + proxyUser + ":" + proxyPass);
         }
         cliArgsCap.add("--max-disk-cache-size=0");
         cliArgsCap.add("--disk-cache=false");
@@ -143,7 +142,7 @@ public class InstaLikeNonGUI {
                 loginAttempts += 1;
                 sleepBetweenLikesHashtags(60, 20);
                 if (loginAttempts == 10 && !possiblePasswordReset) {
-                    flagAccountForReset("login");
+//                    flagAccountForReset("login");
                 }
             }
             driver.quit();
@@ -195,58 +194,77 @@ public class InstaLikeNonGUI {
         int count = 0;
         int loopCount = 0;
         boolean firstScroll = false;
-        boolean test = true;
         try {
             driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
             driver.get(url);
             while (count < hashtagLikeLimit && instagramCounter < insMaxLikes) {
                 driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
-                pictures = driver.findElements(By.xpath("//article/div/div/div[position()>=" + loopCount * 5 + "]/a[@class='_8mlbc _vbtk2 _t5r8b']"));
+                List<WebElement> pictures = driver.findElements(By.xpath("//article/div/div/div[position()>=" + loopCount * 5 + "]/a[@class='_8mlbc _vbtk2 _t5r8b']"));
                 for (int i = 0; i < pictures.size(); i++) {
+                    if (loopCount >= 5) {
+                        break;
+                    }
+
+                    if (firstScroll && i >= 12) {
+                        break;
+                    }
+
+                    System.out.println("Loop Count " + loopCount + " i " + i + " size " + pictures.size());
                     //Expand picture
 
                     pictures.get(i).click();
 
                     //verify picture not liked
-                    By likeButton = By.xpath("//a/span[@class='_soakw coreSpriteHeartOpen']");
+                    By likeButton = By.xpath("//a/span[@class='_soakw coreSpriteHeartOpen'] ");
                     List<WebElement> like = driver.findElements(likeButton);
                     if (like.isEmpty()) {
-                        System.out.println("Picture was liked");
-                        closePictureWindow(loopCount);
-                        continue;
+                        likeButton = By.xpath("//a/span[@class='_soakw coreSpriteLikeHeartOpen']");
+                        like = driver.findElements(likeButton);
+                        if (like.isEmpty()) {
+                            System.out.println("Picture was liked");
+                            pictures = closePictureWindow(loopCount);
+                            continue;
+                        }
                     }
 
                     // Verify tag size is within threshold
                     List<WebElement> tags = driver.findElements(By.xpath("//article/div/ul[1]/li[1]/h1[1]/span[1]/a"));
                     if (tags.size() >= tagLimit) {
                         System.out.println("Tag Limit Too High " + tags.size());
-                        closePictureWindow(loopCount);
+                        pictures = closePictureWindow(loopCount);
                         continue;
                     }
 
-                    //verify username present
-                    List<WebElement> picUsername = driver.findElements(By.xpath("//article/header/div[@class='_f95g7']/a[1]"));
+                    List<WebElement> picUsername = driver.findElements(By.xpath("//article/header/a[1]"));
                     if (picUsername.isEmpty()) {
                         System.out.println("Unable to read username");
-                        closePictureWindow(loopCount);
+                        pictures = closePictureWindow(loopCount);
                         continue;
                     }
 
                     //verify user has not been liked already
-                    String name = picUsername.get(0).getText();
-                    if (userExist(name)) {
+                    String name = picUsername.get(0).getAttribute("href");
+                    if (name.length() < 29) {
+                        System.out.println("Unable to read username link");
+                        continue;
+                    }
+
+                    String cleanName = name.substring(26, name.length()-1);
+
+                    //verify user has not been liked already
+                    if (userExist(cleanName)) {
                         System.out.println("Already like a photo from user");
-                        closePictureWindow(loopCount);
+                        pictures = closePictureWindow(loopCount);
                         continue;
                     }
 
                     //push user to array list
-                    likeUsers.add(name);
+                    likeUsers.add(cleanName);
 
                     //Verify follower count is within threshold
-                    if (isProfileSpam(name)) {
-                        System.out.println("Profile seems like spam " + name);
-                        closePictureWindow(loopCount);
+                    if (isProfileSpam(cleanName)) {
+                        System.out.println("Profile seems like spam " + cleanName);
+                        pictures = closePictureWindow(loopCount);
                         continue;
                     }
 
@@ -255,14 +273,13 @@ public class InstaLikeNonGUI {
 
                     //Verify photo was liked
                     if (!liked) {
-                        System.out.println("Error while liking photo " + name);
-                        closePictureWindow(loopCount);
+                        System.out.println("Error while liking photo " + cleanName);
+                        pictures = closePictureWindow(loopCount);
                         continue;
                     }
 
                     count = afterLikeIncrement(count);
-                    loopCount = 0;
-                    closePictureWindow(loopCount);
+                    pictures = closePictureWindow(loopCount);
                     //Break from loop if photo threshold met
                     if (count >= (hashtagLikeLimit) || instagramCounter >= insMaxLikes) {
                         break;
@@ -270,31 +287,28 @@ public class InstaLikeNonGUI {
                     sleepBetweenLikesHashtags(highBetweenLikesSleepThreshold, hashtagLikeSleep);
                 }
 
-                //Exit method if count greater then hashtag limit
-                if (count >= (hashtagLikeLimit)) {
+                //Exit method if count greater then hashtag limit or loop count exceeded (should never hit loop count here)
+                if (count >= (hashtagLikeLimit) || loopCount >= 5) {
                     break;
                 }
 
-                // Verify if we need to load more photos via button or scroll and if we loaded too many photos
-                if (loopCount == 5) {
-                    System.out.println("Too Many page searches with no likes on Instagram");
-                    break;
-                } else {
-                    loopCount += 1;
-                    if (firstScroll) {
-                        actions.sendKeys(Keys.chord(Keys.CONTROL, Keys.END)).perform();
-                        continue;
-                    }
+                if (!firstScroll) {
+                    // Hit the load more photos button
                     List<WebElement> nextPage = driver.findElements(By.linkText("Load more"));
                     if (nextPage.isEmpty()) {
                         System.out.println("No next page on Instagram");
                         break;
                     }
+                    System.out.println("Click button to load more!");
                     driver.manage().timeouts().implicitlyWait(15, TimeUnit.SECONDS);
                     nextPage.get(0).click();
                     firstScroll = true;
+                    loopCount +=1;
+                } else {
+                    loopCount +=1;
                 }
             }
+
             Date date = new Date();
             System.out.println("Site: Instagram Number of Likes: " + instaTotalLikes + " Hashtag: " + hashtag + " System Date " + date.toString());
         } catch (org.openqa.selenium.WebDriverException e) {
@@ -325,14 +339,14 @@ public class InstaLikeNonGUI {
         return (followingCountSpam || followerCountSpam);
     }
 
-    private void closePictureWindow(int loopCount) throws org.openqa.selenium.remote.UnreachableBrowserException {
+    private List<WebElement> closePictureWindow(int loopCount) throws org.openqa.selenium.remote.UnreachableBrowserException {
 
         List<WebElement> exit = driver.findElements(By.xpath("//button[@class='_3eajp']"));
         if (!exit.isEmpty()) {
             exit.get(0).click();
         }
 
-        pictures = driver.findElements(By.xpath("//article/div/div/div[position()>=" + loopCount * 5 + "]/a[@class='_8mlbc _vbtk2 _t5r8b']"));
+        return driver.findElements(By.xpath("//article/div/div/div[position()>=" + loopCount * 5 + "]/a[@class='_8mlbc _vbtk2 _t5r8b']"));
     }
 
     private boolean isFollowerCountSpam() {
@@ -395,7 +409,7 @@ public class InstaLikeNonGUI {
         long timeLike = System.currentTimeMillis();
         if (timeLike - timeOffsetInstagramTotal > hourTime) {
             System.out.println("Like period Ended:" + date.toString() + " Total Likes " + instagramCounter);
-            if (instagramCounter <= photoPerHourResetThres && !possiblePasswordReset && timeOffsetInstagramTotal != 0) {
+            if (instagramCounter < photoPerHourResetThres && !possiblePasswordReset && timeOffsetInstagramTotal != 0) {
                 flagAccountForReset("likes");
             }
             instagramCounter = 0;
